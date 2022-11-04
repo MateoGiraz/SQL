@@ -59,13 +59,9 @@ INSERT INTO ALQUILA VALUES (7,'52682880','01/06/2022','09/06/2022');
 INSERT INTO ALQUILA VALUES (7,'57345671','10/06/2022','15/06/2022');
 INSERT INTO ALQUILA VALUES (7,'52846994','20/06/2022','25/06/2022');
 
---test cases 6. Deberia devolver 
---test cases 7. Deberia devolver 
+--test cases 6. Deberia devolver:
+--test cases 7. Deberia devolver: MIGUEL, 3
 --test cases 8. Deberia devolver 
 --test cases 9. Deberia devolver 
 --test cases 10. Deberia devolver 
---test cases 11. Deberia devolver 
---test cases 12. Deberia devolver 
---test cases 12. Deberia devolver 
-
 
