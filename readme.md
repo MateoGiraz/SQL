@@ -177,12 +177,12 @@ WHERE p.NROPROYECTO IN (SELECT NROPROYECTO
 
                           GROUP BY NROPROYECTO
 
-                          HAVING COUNT(\*) >= 3)
+                          HAVING COUNT(*) >= 3)
 ```
 ## Ejercicio 7) 
 #### SQL
 ```
-SELECT a.DOCUMENTO, COUNT(\*)
+SELECT a.DOCUMENTO, COUNT(*)
 
 FROM ALQUILA a
 
@@ -236,7 +236,7 @@ WHERE e.ID IN(SELECT a.ID
 
                 GROUP BY ID
 
-                HAVING COUNT(\*) = (SELECT MAX(COUNT(\*))
+                HAVING COUNT(*) = (SELECT MAX(COUNT(*))
 
                                      FROM ALQUILA
 
@@ -252,7 +252,7 @@ AND e.ID IN (SELECT ID
 
                                  GROUP BY DOCUMENTO
 
-                                 HAVING COUNT(\*) = (SELECT MIN(COUNT(\*))
+                                 HAVING COUNT(*) = (SELECT MIN(COUNT(*))
 
                                                      FROM CONTRATA
 
