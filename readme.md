@@ -1,3 +1,5 @@
+[Doc para editar](https://docs.google.com/document/d/1C5YyI4ZGE8aLO2fYO_k13kTdU5d0-ti2l6oU0lvz7bk/edit#)
+
 ## Ejercicio 1)
 #### AR
 EquipoVial ← σ e.Categoria = ‘Vial’ (ρ (EQUIPO) e)
