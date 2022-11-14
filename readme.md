@@ -30,7 +30,7 @@ EquipoVial ← σ e.Categoria = ‘Vial’ (ρ (EQUIPO) e)
 
 EquipoConstruccion ← σ e.Categoria = ‘Construccion’ (ρ (EQUIPO) e)
 
-AlquierQuincena ← σ a.FInicio >= ‘01/09/2022’ ∧  a.FFIN <= ‘15/09/2022’ (ρ (ALQUILA) a)
+AlquierQuincena ← σ a.FInicio >= ‘01/09/2022’
 
 DocVial ← π Documento (EquipoVial \* AlquierQuincena)
 
@@ -51,7 +51,7 @@ INNER JOIN CONTACTO c ON c.DOCUMENTO = a.DOCUMENTO
 
 WHERE (e.CATEGORIA = 'VIAL' OR e.CATEGORIA = 'CONSTRUCCION')
 
-AND a.FINICIO >= '01/09/2022' AND a.FFIN <= '15/09/2022'
+AND a.FINICIO >= '01/09/2022'
 
 MINUS
 
@@ -65,7 +65,7 @@ INNER JOIN CONTACTO c ON c.DOCUMENTO = a.DOCUMENTO
 
 WHERE e.CATEGORIA = 'VIAL'
 
-AND a.FINICIO >= '01/09/2022' AND a.FFIN <= '15/09/2022'
+AND a.FINICIO >= '01/09/2022'
 
 INTERSECT
 
