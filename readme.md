@@ -167,7 +167,7 @@ AND EXISTS(SELECT 1
 ```
 SELECT p.NOMBRE, t.IDTAREA, t.DESCRIPCION,
 
-NVL(TO\_CHAR(t.FREALIZACION), 'Pendiente de realización')
+NVL(TO_CHAR(t.FREALIZACION), 'Pendiente de realización')
 
 FROM TAREA t
 
@@ -259,4 +259,66 @@ AND e.ID IN (SELECT ID
                                                      FROM CONTRATA
 
                                                      GROUP BY DOCUMENTO)))
+```
+## Ejercicio 10)
+#### SQL
+```
+SELECT distinct cantAlq.CAT, c.NOMBRE, cantAlq.CANT, round((cantAlq.CANT/total.CANT)*100, 2), p.NOMBRE
+FROM
+    (SELECT e.CATEGORIA as CAT, a.DOCUMENTO as DOC, COUNT(*) AS CANT
+    FROM ALQUILA a
+    INNER JOIN EQUIPO e ON e.ID = a.ID
+    WHERE e.CATEGORIA = 'VIAL' OR e.CATEGORIA = 'CONSTRUCCION'
+    GROUP BY a.DOCUMENTO, e.CATEGORIA) cantAlq,
+   
+    ((SELECT 'VIAL' as cat, count(*) as CANT
+    FROM ALQUILA a
+    INNER JOIN EQUIPO e ON e.ID = a.ID
+    WHERE e.CATEGORIA = 'VIAL')
+    UNION
+    (SELECT 'CONSTRUCCION' as cat, count(*) as CANT
+    FROM ALQUILA a
+    INNER JOIN EQUIPO e ON e.ID = a.ID
+    WHERE e.CATEGORIA = 'CONSTRUCCION')) total,
+   
+    ((SELECT distinct t.NROPROYECTO as nro, 'VIAL' as cat
+   FROM TAREA t
+   INNER JOIN PROYECTO p ON p.NROPROYECTO = t.NROPROYECTO
+   INNER JOIN CONTRATA c ON c.NROPROYECTO = p.NROPROYECTO
+   INNER JOIN ALQUILA a ON a.DOCUMENTO = c.DOCUMENTO
+   INNER JOIN EQUIPO e ON e.ID = a.ID
+   WHERE e.CATEGORIA = 'VIAL'
+   GROUP BY t.NROPROYECTO
+   HAVING COUNT(DISTINCT T.IDTAREA) = (SELECT MAX(COUNT(DISTINCT t.IDTAREA))
+                                       FROM TAREA t
+                                       INNER JOIN PROYECTO p ON p.NROPROYECTO = t.NROPROYECTO
+                                       INNER JOIN CONTRATA c ON c.NROPROYECTO = p.NROPROYECTO
+                                       INNER JOIN ALQUILA a ON a.DOCUMENTO = c.DOCUMENTO
+                                       INNER JOIN EQUIPO e ON e.ID = a.ID
+                                       WHERE e.CATEGORIA = 'VIAL'
+                                       GROUP BY t.NROPROYECTO)
+   UNION
+   SELECT distinct t.NROPROYECTO as nro, 'CONSTRUCCION' as cat
+   FROM TAREA t
+   INNER JOIN PROYECTO p ON p.NROPROYECTO = t.NROPROYECTO
+   INNER JOIN CONTRATA c ON c.NROPROYECTO = p.NROPROYECTO
+   INNER JOIN ALQUILA a ON a.DOCUMENTO = c.DOCUMENTO
+   INNER JOIN EQUIPO e ON e.ID = a.ID
+   WHERE e.CATEGORIA = 'CONSTRUCCION'
+   GROUP BY t.NROPROYECTO
+   HAVING COUNT(DISTINCT T.IDTAREA) = (SELECT MAX(COUNT(DISTINCT t.IDTAREA))
+                                       FROM TAREA t
+                                       INNER JOIN PROYECTO p ON p.NROPROYECTO = t.NROPROYECTO
+                                       INNER JOIN CONTRATA c ON c.NROPROYECTO = p.NROPROYECTO
+                                       INNER JOIN ALQUILA a ON a.DOCUMENTO = c.DOCUMENTO
+                                       INNER JOIN EQUIPO e ON e.ID = a.ID
+                                       WHERE e.CATEGORIA = 'CONSTRUCCION'
+                                       GROUP BY t.NROPROYECTO))) proyecto,
+   
+    CONTACTO c,
+    PROYECTO p
+   
+WHERE cantAlq.CAT = total.CAT AND c.DOCUMENTO = cantAlq.DOC
+AND cantAlq.CAT = proyecto.CAT AND p.NROPROYECTO = proyecto.nro
+
 ```
