@@ -320,5 +320,6 @@ FROM
    
 WHERE cantAlq.CAT = total.CAT AND c.DOCUMENTO = cantAlq.DOC
 AND cantAlq.CAT = proyecto.CAT AND p.NROPROYECTO = proyecto.nro
+ORDER BY cantAlq.CAT DESC
 
 ```
