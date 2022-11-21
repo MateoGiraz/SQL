@@ -2,12 +2,12 @@
 
 /*Test case ej10.
   Debería devolver:
-  CONSTRUCCION - MIGUEL - 3 - 50 - N3
-  CONSTRUCCION - ANA - 3 - 50 - N3
+  VIAL - HUGO - 5 - 62.50 - N1
+  VIAL - HUGO - 5 - 62.50 - N2
   VIAL - MIGUEL - 3 - 37.50 - N1
   VIAL - MIGUEL - 3 - 37.50 - N2
-  VIAL - HUGO - 5 - 62.50 - N1
-  VIAL - HUGO - 5 - 62.50 - N2 
+  CONSTRUCCION - ANA - 3 - 50 - N3
+  CONSTRUCCION - MIGUEL - 3 - 50 - N3
 */
 
 --insert contactos
