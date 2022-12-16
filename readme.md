@@ -1,5 +1,9 @@
 [Doc para editar](https://docs.google.com/document/d/1C5YyI4ZGE8aLO2fYO_k13kTdU5d0-ti2l6oU0lvz7bk/edit#)
 
+## Consigna 1)
+Obtener para los equipos que sean de categoría vial, el nombre de los contactos que los
+alquilaron. Considerar aquellos equipos que fueron alquilados al menos una vez y dicho
+alquiler haya iniciado en junio de 2022.
 ## Ejercicio 1)
 #### AR
 EquipoVial ← σ e.Categoria = ‘Vial’ (ρ (EQUIPO) e)
@@ -24,6 +28,10 @@ WHERE e.CATEGORIA = 'VIAL' AND
 a.FINICIO BETWEEN '01/06/2022' AND '30/06/2022'
 ```
 
+## Consigna 2)
+Obtener el nombre, teléfono y tipo de contacto para aquellos contactos que hayan alquilado
+equipos de construcción o vial pero no de ambas categorías. Considerar solo los alquileres de
+la primera quincena de setiembre de 2022.
 ## Ejercicio 2)
 #### AR
 EquipoVial ← σ e.Categoria = ‘Vial’ (ρ (EQUIPO) e)
@@ -81,6 +89,10 @@ WHERE e.CATEGORIA = 'CONSTRUCCION'
 
 AND a.FINICIO >= '01/09/2022' AND a.FFIN <= '15/09/2022')
 ```
+## Consigna 3)
+Obtener la descripción y la fecha de realización de la tarea que se realizó primero dentro del
+proyecto “Renovación hidráulica”. Si hay más de una tarea con esta condición, mostrarlas
+todas
 ## Ejercicio 3)
 #### AR
 TareasH ← π Descripcion, FRealizacion (TAREA \* (σ p.Nombre = ‘Renovación hidráulica’  (ρ (PROYECTO) p)))
@@ -103,6 +115,10 @@ WHERE FREALIZACION in(SELECT MIN(FREALIZACION)
                     WHERE p.NOMBRE = 'RENOVACION HIDRAULICA')
 ```
 
+## Consigna 4)
+Obtener el documento y nombre de los contactos que hayan contratado más de un proyecto,
+así como también los números de los proyectos que contrató. Considerar aquellos proyectos
+que aún no estén terminados
 ## Ejercicio 4)
 #### AR
 DocRecurrente ← π Documento, NroProy (ρ (Contrata) c1) |x| σ c1.Documento == c2.Documento ∧ c1.NroProy != c2.NroProy (ρ (Contrata) c2)
@@ -126,6 +142,10 @@ INNER JOIN PROYECTO p2 ON c2.NROPROYECTO = p2.NROPROYECTO
 
 WHERE p.FFINALIZACION is null AND p2.FFINALIZACION is null
 ```
+## Consigna 5)
+Obtener el id de los equipos que hayan sido alquilados por todos los contactos. Considerar
+únicamente aquellos equipos cuyo estado sea “Service” y la fecha adquirida haya sido en el
+2022.
 ## Ejercicio 5)
 #### AR
 EquiposService2022 ←π Id (σ e.Estado = ‘Service’ ∧ e.FechaAdquirido >= ‘01/01/2022’ ∧  e.FechaAdquirido <= ‘31/12/2022’ (ρ (EQUIPO) e))
@@ -162,6 +182,11 @@ AND EXISTS(SELECT 1
 
             FROM CONTACTO)
 ```
+## Consigna 6)
+Obtener todos los datos de las tareas, así como también el nombre del proyecto al que
+pertenecen. Para las tareas realizadas, mostrar la fecha de realización y para aquellas
+pendientes, mostrar el texto “Pendiente de realización”. Considerar aquellos proyectos que
+tengan al menos 3 tareas.
 ## Ejercicio 6)
 #### SQL
 ```
@@ -181,6 +206,9 @@ WHERE p.NROPROYECTO IN (SELECT NROPROYECTO
 
                           HAVING COUNT(*) >= 3)
 ```
+## Consigna 7)
+Obtener para cada ingeniero, la cantidad de equipos que alquiló. Considerar únicamente los
+tipos “Construcción” y “Terreno”.
 ## Ejercicio 7) 
 #### SQL
 ```
@@ -198,6 +226,10 @@ WHERE c.TIPO = 'INGENIERO' AND
 
 GROUP BY a.DOCUMENTO
 ```
+## Consigna 8)
+Obtener el documento y nombre de los contactos que alquilaron la mayor cantidad de equipos
+distintos. Considerar solamente contactos que hayan contratado proyectos que finalizaron
+dentro de los últimos 30 días.
 ## Ejercicio 8)
 #### SQL
 ```
@@ -225,6 +257,10 @@ AND DOCUMENTO IN (SELECT C.DOCUMENTO
 
                    WHERE p.FFINALIZACION > SYSDATE - 30)
 ```
+## Consigna 9)
+Obtener el nombre y la fecha de adquisición de los equipos que tuvieron la mayor cantidad de
+alquileres. Además, dichos equipos deben haber sido alquilados por algún contacto que haya
+contratado la menor cantidad de proyectos.
 ## Ejercicio 9) 
 #### SQL
 ```
@@ -260,6 +296,13 @@ AND e.ID IN (SELECT ID
 
                                                      GROUP BY DOCUMENTO)))
 ```
+## Consigna 10)
+Obtener para las categorías de equipo vial y construcción los contactos que alquilaron equipos
+de dichas categorías y la cantidad total de alquileres que realizó dicho contacto para esa
+categoría. Obtener el porcentaje que representa esta cantidad sobre el total de alquileres para
+cada categoría solicitada. Además, obtener el nombre del proyecto en el cual se realizaron la
+mayor cantidad de tareas dentro de cada categoría solicitada (si hay más de un proyecto con
+la mayor cantidad de tareas, se deben listar todos ellos).
 ## Ejercicio 10)
 #### SQL
 ```
