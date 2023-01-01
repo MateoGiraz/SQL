@@ -1,0 +1,360 @@
+--1
+SELECT
+  DISTINCT c.NOMBRE
+FROM
+  ALQUILA a
+  INNER JOIN EQUIPO e ON e.ID = a.ID
+  INNER JOIN CONTACTO c ON a.DOCUMENTO = c.DOCUMENTO
+WHERE
+  e.CATEGORIA = 'VIAL'
+  AND a.FINICIO BETWEEN '01/06/2022'
+  AND '30/06/2022';
+
+--2
+SELECT
+  DISTINCT c.NOMBRE,
+  c.TELEFONO,
+  c.TIPO
+FROM
+  ALQUILA a
+  INNER JOIN EQUIPO e ON e.ID = a.ID
+  INNER JOIN CONTACTO c ON c.DOCUMENTO = a.DOCUMENTO
+WHERE
+  (
+    e.CATEGORIA = 'VIAL'
+    OR e.CATEGORIA = 'CONSTRUCCION'
+  )
+  AND a.FINICIO >= '01/09/2022'
+MINUS
+(
+  SELECT
+    DISTINCT c.NOMBRE,
+    c.TELEFONO,
+    c.TIPO
+  FROM
+    ALQUILA a
+    INNER JOIN EQUIPO e ON e.ID = a.ID
+    INNER JOIN CONTACTO c ON c.DOCUMENTO = a.DOCUMENTO
+  WHERE
+    e.CATEGORIA = 'VIAL'
+    AND a.FINICIO >= '01/09/2022'
+  INTERSECT
+  SELECT
+    DISTINCT c.NOMBRE,
+    c.TELEFONO,
+    c.TIPO
+  FROM
+    ALQUILA a
+    INNER JOIN EQUIPO e ON e.ID = a.ID
+    INNER JOIN CONTACTO c ON c.DOCUMENTO = a.DOCUMENTO
+  WHERE
+    e.CATEGORIA = 'CONSTRUCCION'
+    AND a.FINICIO >= '01/09/2022'
+    AND a.FFIN <= '15/09/2022'
+);
+
+--3
+SELECT
+  FREALIZACION,
+  DESCRIPCION
+FROM
+  TAREA
+WHERE
+  FREALIZACION in(
+    SELECT
+      MIN(FREALIZACION)
+    FROM
+      TAREA t
+      INNER JOIN PROYECTO p ON t.NROPROYECTO = p.NROPROYECTO
+    WHERE
+      p.NOMBRE = 'RENOVACION HIDRAULICA'
+  );
+
+--4
+SELECT
+  DISTINCT c.NOMBRE,
+  c1.DOCUMENTO,
+  c1.NROPROYECTO
+FROM
+  CONTRATA c1
+  INNER JOIN CONTACTO c ON c1.DOCUMENTO = c.DOCUMENTO
+  INNER JOIN CONTRATA c2 ON c1.DOCUMENTO = c2.DOCUMENTO
+  AND c1.NROPROYECTO != c2.NROPROYECTO
+  INNER JOIN PROYECTO p ON p.NROPROYECTO = c1.NROPROYECTO
+  INNER JOIN PROYECTO p2 ON c2.NROPROYECTO = p2.NROPROYECTO
+WHERE
+  p.FFINALIZACION is null
+  AND p2.FFINALIZACION is null;
+
+--5
+SELECT
+  e.ID
+FROM
+  EQUIPO e
+WHERE
+  e.ESTADO = 'SERVICE'
+  AND e.FECHAADQUIRIDO BETWEEN '01/01/2022'
+  AND '31/12/2022'
+  AND NOT EXISTS(
+    SELECT
+      1
+    FROM
+      CONTACTO c
+    WHERE
+      NOT EXISTS(
+        SELECT
+          1
+        FROM
+          ALQUILA a
+        WHERE
+          a.DOCUMENTO = c.DOCUMENTO
+          AND a.ID = e.ID
+      )
+  )
+  AND EXISTS(
+    SELECT
+      1
+    FROM
+      CONTACTO
+  );
+
+--6
+SELECT
+  p.NOMBRE,
+  t.IDTAREA,
+  t.DESCRIPCION,
+  NVL(
+    TO_CHAR(t.FREALIZACION),
+    'Pendiente de realización'
+  )
+FROM
+  TAREA t
+  INNER JOIN PROYECTO p ON t.NROPROYECTO = p.NROPROYECTO
+WHERE
+  p.NROPROYECTO IN (
+    SELECT
+      NROPROYECTO
+    FROM
+      TAREA
+    GROUP BY
+      NROPROYECTO
+    HAVING
+      COUNT(*) >= 3
+  );
+
+--7
+SELECT
+  a.DOCUMENTO,
+  COUNT(*)
+FROM
+  ALQUILA a
+  INNER JOIN CONTACTO c ON a.DOCUMENTO = c.DOCUMENTO
+  INNER JOIN EQUIPO e ON e.ID = a.ID
+WHERE
+  c.TIPO = 'INGENIERO'
+  AND (
+    e.CATEGORIA = 'CONSTRUCCION'
+    OR e.CATEGORIA = 'TERRENO'
+  )
+GROUP BY
+  a.DOCUMENTO;
+
+--8
+SELECT
+  DOCUMENTO,
+  NOMBRE
+FROM
+  CONTACTO
+WHERE
+  DOCUMENTO IN (
+    SELECT
+      DOCUMENTO
+    FROM
+      ALQUILA a
+    GROUP BY
+      DOCUMENTO
+    HAVING
+      COUNT(DISTINCT a.ID) = (
+        SELECT
+          MAX(COUNT(DISTINCT a.ID))
+        FROM
+          ALQUILA a
+        GROUP BY
+          DOCUMENTO
+      )
+  )
+  AND DOCUMENTO IN (
+    SELECT
+      C.DOCUMENTO
+    FROM
+      CONTRATA c
+      INNER JOIN PROYECTO p ON c.NROPROYECTO = p.NROPROYECTO
+    WHERE
+      p.FFINALIZACION > SYSDATE - 30
+  );
+
+--9
+SELECT
+  e.NOMBRE,
+  e.FECHAADQUIRIDO
+FROM
+  EQUIPO e
+WHERE
+  e.ID IN(
+    SELECT
+      a.ID
+    FROM
+      ALQUILA a
+    GROUP BY
+      ID
+    HAVING
+      COUNT(*) = (
+        SELECT
+          MAX(COUNT(*))
+        FROM
+          ALQUILA
+        GROUP BY
+          ID
+      )
+  )
+  AND e.ID IN (
+    SELECT
+      ID
+    FROM
+      ALQUILA a
+    WHERE
+      a.DOCUMENTO IN(
+        SELECT
+          DOCUMENTO
+        FROM
+          CONTRATA
+        GROUP BY
+          DOCUMENTO
+        HAVING
+          COUNT(*) = (
+            SELECT
+              MIN(COUNT(*))
+            FROM
+              CONTRATA
+            GROUP BY
+              DOCUMENTO
+          )
+      )
+  );
+
+--10
+SELECT
+  distinct cantAlq.CAT,
+  c.NOMBRE,
+  cantAlq.CANT,
+  round((cantAlq.CANT / total.CANT) * 100, 2),
+  p.NOMBRE
+FROM
+  (
+    SELECT
+      e.CATEGORIA as CAT,
+      a.DOCUMENTO as DOC,
+      COUNT(*) AS CANT
+    FROM
+      ALQUILA a
+      INNER JOIN EQUIPO e ON e.ID = a.ID
+    WHERE
+      e.CATEGORIA = 'VIAL'
+      OR e.CATEGORIA = 'CONSTRUCCION'
+    GROUP BY
+      a.DOCUMENTO,
+      e.CATEGORIA
+  ) cantAlq,
+  (
+    (
+      SELECT
+        'VIAL' as cat,
+        count(*) as CANT
+      FROM
+        ALQUILA a
+        INNER JOIN EQUIPO e ON e.ID = a.ID
+      WHERE
+        e.CATEGORIA = 'VIAL'
+    )
+    UNION
+    (
+      SELECT
+        'CONSTRUCCION' as cat,
+        count(*) as CANT
+      FROM
+        ALQUILA a
+        INNER JOIN EQUIPO e ON e.ID = a.ID
+      WHERE
+        e.CATEGORIA = 'CONSTRUCCION'
+    )
+  ) total,
+  (
+    (
+      SELECT
+        distinct t.NROPROYECTO as nro,
+        'VIAL' as cat
+      FROM
+        TAREA t
+        INNER JOIN PROYECTO p ON p.NROPROYECTO = t.NROPROYECTO
+        INNER JOIN CONTRATA c ON c.NROPROYECTO = p.NROPROYECTO
+        INNER JOIN ALQUILA a ON a.DOCUMENTO = c.DOCUMENTO
+        INNER JOIN EQUIPO e ON e.ID = a.ID
+      WHERE
+        e.CATEGORIA = 'VIAL'
+      GROUP BY
+        t.NROPROYECTO
+      HAVING
+        COUNT(DISTINCT T.IDTAREA) = (
+          SELECT
+            MAX(COUNT(DISTINCT t.IDTAREA))
+          FROM
+            TAREA t
+            INNER JOIN PROYECTO p ON p.NROPROYECTO = t.NROPROYECTO
+            INNER JOIN CONTRATA c ON c.NROPROYECTO = p.NROPROYECTO
+            INNER JOIN ALQUILA a ON a.DOCUMENTO = c.DOCUMENTO
+            INNER JOIN EQUIPO e ON e.ID = a.ID
+          WHERE
+            e.CATEGORIA = 'VIAL'
+          GROUP BY
+            t.NROPROYECTO
+        )
+      UNION
+      SELECT
+        distinct t.NROPROYECTO as nro,
+        'CONSTRUCCION' as cat
+      FROM
+        TAREA t
+        INNER JOIN PROYECTO p ON p.NROPROYECTO = t.NROPROYECTO
+        INNER JOIN CONTRATA c ON c.NROPROYECTO = p.NROPROYECTO
+        INNER JOIN ALQUILA a ON a.DOCUMENTO = c.DOCUMENTO
+        INNER JOIN EQUIPO e ON e.ID = a.ID
+      WHERE
+        e.CATEGORIA = 'CONSTRUCCION'
+      GROUP BY
+        t.NROPROYECTO
+      HAVING
+        COUNT(DISTINCT T.IDTAREA) = (
+          SELECT
+            MAX(COUNT(DISTINCT t.IDTAREA))
+          FROM
+            TAREA t
+            INNER JOIN PROYECTO p ON p.NROPROYECTO = t.NROPROYECTO
+            INNER JOIN CONTRATA c ON c.NROPROYECTO = p.NROPROYECTO
+            INNER JOIN ALQUILA a ON a.DOCUMENTO = c.DOCUMENTO
+            INNER JOIN EQUIPO e ON e.ID = a.ID
+          WHERE
+            e.CATEGORIA = 'CONSTRUCCION'
+          GROUP BY
+            t.NROPROYECTO
+        )
+    )
+  ) proyecto,
+  CONTACTO c,
+  PROYECTO p
+WHERE
+  cantAlq.CAT = total.CAT
+  AND c.DOCUMENTO = cantAlq.DOC
+  AND cantAlq.CAT = proyecto.CAT
+  AND p.NROPROYECTO = proyecto.nro
+ORDER BY
+  cantAlq.CAT DESC
